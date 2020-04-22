@@ -1,5 +1,7 @@
 package org.myitschool.androidsnake.game;
 
+import org.myitschool.androidsnake.Constants;
+
 public class GameMap {
 
     private int width;
@@ -27,7 +29,7 @@ public class GameMap {
             for (int x = 0; x < width; x++)
                 buffer[y][x] = map[y][x];
         // пишем сегменты
-        for(Snake.Segment seg: snake.getSegments())
+        for(SnakeSegment seg: snake.getSegments())
             if(seg != null)
                 buffer[seg.y][seg.x] = '*';
         // строим строку
@@ -51,4 +53,21 @@ public class GameMap {
             }
     }
 
+    public void update() {
+        snake.update();
+    }
+
+    public void onSwipeTop() {
+        snake.setHeadDirection(Constants.DIR_TOP);
+    }
+
+    public void onSwipeRight() {
+        snake.setHeadDirection(Constants.DIR_RIGHT);
+    }
+    public void onSwipeLeft() {
+        snake.setHeadDirection(Constants.DIR_LEFT);
+    }
+    public void onSwipeBottom() {
+        snake.setHeadDirection(Constants.DIR_BOTTOM);
+    }
 }

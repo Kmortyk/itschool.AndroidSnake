@@ -1,34 +1,50 @@
 package org.myitschool.androidsnake;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.annotation.SuppressLint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Looper;
+import android.text.Layout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.myitschool.androidsnake.controller.OnSwipeTouchListener;
 import org.myitschool.androidsnake.game.GameMap;
 
 public class MainActivity extends AppCompatActivity {
 
     private GameMap gameMap;
     private TextView textView;
+    private ConstraintLayout gameLayout;
 
-    @Override
+    @Override @SuppressLint("ClickableViewAccessibility")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // найти view
-        textView = findViewById(R.id.textView);
+
+        // find views
+        textView = findViewById(R.id.text_view);
+        gameLayout = findViewById(R.id.game_layout);
         textView.setTypeface(Typeface.MONOSPACE);
-        // инициализация карты
-        gameMap = new GameMap(10, 10);
-        // запустить основной цикл игры в отдельном потоке
+
+        // set controllers
+        gameLayout.setOnTouchListener(new OnSwipeTouchListener(this) {
+            public void onSwipeTop() { gameMap.onSwipeTop(); }
+            public void onSwipeRight() { gameMap.onSwipeRight(); }
+            public void onSwipeLeft() { gameMap.onSwipeLeft(); }
+            public void onSwipeBottom() { gameMap.onSwipeBottom(); }
+        });
+
+        // init game map and main loop
+        gameMap = new GameMap(20, 12);
         new Thread(this::gameLoop).start();
     }
 
     /**
-     * WARNING !!! Запускать в отдельном потоке !!!
+     * Run only in the separate thread
      */
     private void gameLoop() {
         if(Looper.myLooper() == Looper.getMainLooper())
@@ -45,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            // gameMap.update();
+            gameMap.update();
         }
 
     }
