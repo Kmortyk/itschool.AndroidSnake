@@ -5,49 +5,65 @@ import org.myitschool.androidsnake.Constants;
 import java.util.ArrayList;
 import java.util.List;
 
-class SnakeSegment {
-    int dir = Constants.DIR_BOTTOM;
-    int x, y;
+public class Snake {
 
-    SnakeSegment(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
+    public static class Segment {
+        public int x;
+        public int y;
 
-    void update() {
-        switch (dir) {
-            case Constants.DIR_TOP: y -= Constants.STEP;
-                break;
-            case Constants.DIR_RIGHT: x += Constants.STEP;
-                break;
-            case Constants.DIR_BOTTOM: y += Constants.STEP;
-                break;
-            case Constants.DIR_LEFT: x -= Constants.STEP;
-                break;
+        Segment(int x, int y) {
+            this.x = x;
+            this.y = y;
         }
     }
-}
 
-class Snake {
-
-    private List<SnakeSegment> segments = new ArrayList<>();
+    private List<Segment> segments = new ArrayList<>();
+    private int dir = Constants.DIR_BOTTOM;
+    private Segment head;
 
     Snake() {
-        segments.add(new SnakeSegment(1, 1));
+        head = new Segment(1, 1);
+        segments.add(head);
     }
 
-    void update() {
-        for(SnakeSegment s: segments)
-            s.update();
+    void update(GameMap map) {
+        synchronized (this) {
+            Segment next = new Segment(head.x, head.y);
+
+            switch (dir) {
+                case Constants.DIR_TOP:
+                    next.y -= Constants.STEP;
+                    break;
+                case Constants.DIR_RIGHT:
+                    next.x += Constants.STEP;
+                    break;
+                case Constants.DIR_BOTTOM:
+                    next.y += Constants.STEP;
+                    break;
+                case Constants.DIR_LEFT:
+                    next.x -= Constants.STEP;
+                    break;
+            }
+
+            switch (map.at(next.x, next.y)) {
+                case '*':
+                    map.addBonus();
+                    break;
+                case ' ':
+                    segments.remove(segments.size() - 1);
+                    break;
+            }
+
+            head = next;
+            segments.add(0, next);
+        }
     }
 
     void setHeadDirection(int dir) {
-        if(segments.size() == 0)
-            return;
-        segments.get(segments.size() - 1).dir = dir;
+        this.dir = dir;
     }
 
-    List<SnakeSegment> getSegments() {
+    public List<Segment> getSegments() {
         return segments;
     }
 }

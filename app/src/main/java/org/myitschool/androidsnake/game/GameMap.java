@@ -2,6 +2,9 @@ package org.myitschool.androidsnake.game;
 
 import org.myitschool.androidsnake.Constants;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameMap {
 
     private int width;
@@ -9,7 +12,7 @@ public class GameMap {
 
     private char[][] map;
     private char[][] buffer;
-    private Snake snake;
+    private final Snake snake;
 
     public GameMap(int width, int height) {
         this.width = width;
@@ -20,27 +23,11 @@ public class GameMap {
         snake = new Snake();
 
         createMap();
+        addBonus();
     }
 
-    public String getText() {
-        StringBuilder sb = new StringBuilder();
-        // обновляем буффер
-        for (int y = 0; y < height; y++)
-            for (int x = 0; x < width; x++)
-                buffer[y][x] = map[y][x];
-        // пишем сегменты
-        for(SnakeSegment seg: snake.getSegments())
-            if(seg != null)
-                buffer[seg.y][seg.x] = '*';
-        // строим строку
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++)
-                sb.append(buffer[y][x]);
-            sb.append("\n");
-        }
-        sb.append("\n");
-        // устанавливаем как текст
-        return sb.toString();
+    public void update() {
+        snake.update(this);
     }
 
     private void createMap() {
@@ -51,10 +38,6 @@ public class GameMap {
                 else
                     map[y][x] = ' '; // пустые клетки
             }
-    }
-
-    public void update() {
-        snake.update();
     }
 
     public void onSwipeTop() {
@@ -69,5 +52,48 @@ public class GameMap {
     }
     public void onSwipeBottom() {
         snake.setHeadDirection(Constants.DIR_BOTTOM);
+    }
+
+    public void addBonus() {
+        class Empty {
+            int x, y;
+
+            public Empty(int x, int y) {
+                this.x = x;
+                this.y = y;
+            }
+        }
+
+        List<Empty> emptys = new ArrayList<Empty>();
+
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+                if(map[y][x] == ' ') {
+                    emptys.add(new Empty(x, y));
+                }
+
+        int r = (int) (Math.random()*emptys.size());
+        Empty e = emptys.get(r);
+        map[e.y][e.x] = '*';
+    }
+
+    public boolean inBoundsX(int x) {
+        return x >= 1 && x < width - 1;
+    }
+
+    public boolean inBoundsY(int y) {
+        return y >= 1 && y < height - 1;
+    }
+
+    public char at(int x, int y) {
+        return map[y][x];
+    }
+
+    public char[][] getCharMap() {
+        return map;
+    }
+
+    public Snake getSnake() {
+        return snake;
     }
 }
